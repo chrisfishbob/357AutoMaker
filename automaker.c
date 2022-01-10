@@ -8,6 +8,28 @@
 #include <sys/types.h>
 
 
+int nameIsValid(char *file_name)
+{
+    int dot_count = 0;
+
+    for (int i = 0; i < strlen(file_name) - 1; i++)
+    {
+        if (file_name[i] == '.')
+        {
+            dot_count++;
+        }
+    }
+
+    // If dot_count is not one, automatically invalid
+    if (dot_count != 1)
+    {
+        printf("File name %s is invalid\n", file_name);
+        return 0;
+    }
+
+    return strstr(file_name, ".c") != NULL;
+}
+
 
 void getAllCodeFiles()
 {
@@ -27,7 +49,7 @@ void getAllCodeFiles()
         if (entity->d_type != DT_DIR)
         {
             // Skip non-c or cpp files
-            if (strstr(entity->d_name, ".c") != NULL)
+            if (nameIsValid(entity->d_name))
             {
                 char compile_command[1024];
                 char move_command[1024];

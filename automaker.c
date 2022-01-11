@@ -1,4 +1,7 @@
 #define _GNU_SOURCE
+#define C_COMPILER "gcc"
+#define CPP_COMPILER "g++"
+#define OUTPUT_FOLDER_NAME "output"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,7 +26,7 @@ int nameIsValid(char *file_name)
     // If dot_count is not one, automatically invalid
     if (dot_count != 1)
     {
-        printf("File name %s is invalid\n", file_name);
+        printf("File name %s is invalid. Aborting compilation of this file\n", file_name);
         return 0;
     }
 
@@ -40,8 +43,8 @@ void getAllCodeFiles()
     DIR *dir = opendir(cwd);
     if (dir == NULL)
     {
-        printf("Cannot open directory");
-        exit(0);
+        printf("Cannot open directory\n");
+        exit(-1);
     }
 
     while ((entity = readdir(dir)) != NULL)
@@ -63,33 +66,37 @@ void getAllCodeFiles()
                 // If the substring ".cpp" is not found, the file must be a .c file
                 if (strstr(entity->d_name, ".cpp") == NULL)
                 {
-                    sprintf(compile_command, "gcc %s -o %s", entity->d_name, output_file_name);
+                    sprintf(compile_command, "%s %s -o %s", C_COMPILER, entity->d_name, output_file_name);
                 }
                 else
                 {
-                    sprintf(compile_command, "g++ %s -o %s", entity->d_name, output_file_name);
+                    sprintf(compile_command, "%s %s -o %s", CPP_COMPILER, entity->d_name, output_file_name);
                 }
                 
                 printf("Running: %s\n", compile_command);
-                
                 system(compile_command);
-
-                sprintf(move_command, "mv %s %s", output_file_name, "executables");
+                sprintf(move_command, "mv %s %s", output_file_name, OUTPUT_FOLDER_NAME);
                 system(move_command);
                 files_compiled++;
-                
             }
         }
     }
 
     printf("Compiled %d files\n", files_compiled);
+}
 
+
+void createOutputFolder()
+{
+    char mkdir_command[1024];
+    sprintf(mkdir_command, "mkdir %s", OUTPUT_FOLDER_NAME);
+    system(mkdir_command);
 }
 
 
 int main()
 {
-    system("mkdir executables");
+    createOutputFolder();
     getAllCodeFiles();
 
 
